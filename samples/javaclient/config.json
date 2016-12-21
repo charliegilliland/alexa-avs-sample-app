@@ -3,16 +3,21 @@
     "dsn":"",
     "provisioningMethod":"",
     "wakeWordAgentEnabled":false,
+    "avsHost":"https://avs-alexa-na.amazon.com",
+    "autoLoginEnabled":false,
+    "autoLoginUsername":"",
+    "autoLoginPassword":"",
     "companionApp":{
         "localPort":8443,
+        "lwaUrl":"https://api.amazon.com",
         "sslKeyStore":"",
-        "sslKeyStorePassphrase":"",
-        "lwaUrl":"https://api.amazon.com"
+        "sslKeyStorePassphrase":""
     },
     "companionService":{
         "serviceUrl":"https://localhost:3000",
         "sslClientKeyStore":"",
         "sslClientKeyStorePassphrase":"",
-        "sslCaCert":""
+        "sslCaCert":"",
+        "sessionId":""
     }
 }
