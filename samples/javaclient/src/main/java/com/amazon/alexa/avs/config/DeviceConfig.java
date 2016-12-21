@@ -36,6 +36,10 @@ public class DeviceConfig {
     public static final String PROVISIONING_METHOD = "provisioningMethod";
     public static final String AVS_HOST = "avsHost";
     public static final String WAKE_WORD_AGENT_ENABLED = "wakeWordAgentEnabled";
+    
+    public static final String AUTO_LOGIN_ENABLED = "autoLoginEnabled";
+    public static final String AUTO_LOGIN_USERNAME = "autoLoginUsername";
+    public static final String AUTO_LOGIN_PASSWORD = "autoLoginPassword";
 
     /*
      * Required parameters from the config file.
@@ -51,6 +55,9 @@ public class DeviceConfig {
     private CompanionAppInformation companionAppInfo;
     private CompanionServiceInformation companionServiceInfo;
     private boolean wakeWordAgentEnabled;
+    private boolean autoLoginEnabled;
+    private String autoLoginUsername;
+    private String autoLoginPassword;
 
     @SuppressWarnings("javadoc")
     public enum ProvisioningMethod {
@@ -96,10 +103,20 @@ public class DeviceConfig {
      *            The information necessary for the Companion Service method of provisioning.
      * @param avsHost
      *            (optional) AVS host override
+     *            
+     * @param autoLoginEnabled
+     * 			  Whether auto login functionality is enabled.
+     * 
+     * @param autoLoginUsername
+     * 			  The username used for auto login
+     * 
+     * @param autoLoginPassword	
+     * 			  The password used for auto login
      */
     public DeviceConfig(String productId, String dsn, String provisioningMethod,
             boolean wakeWordAgentEnabled, CompanionAppInformation companionAppInfo,
-            CompanionServiceInformation companionServiceInfo, String avsHost) {
+            CompanionServiceInformation companionServiceInfo, String avsHost,
+            boolean autoLoginEnabled, String autoLoginUsername, String autoLoginPassword) {
 
         if (StringUtils.isBlank(productId)) {
             throw new MalformedConfigException(PRODUCT_ID + " is blank in your config file.");
@@ -142,13 +159,19 @@ public class DeviceConfig {
         }
 
         this.wakeWordAgentEnabled = wakeWordAgentEnabled;
+        
+        this.autoLoginEnabled = autoLoginEnabled;
+        this.autoLoginUsername = autoLoginUsername;
+        this.autoLoginPassword = autoLoginPassword;
     }
 
     public DeviceConfig(String productId, String dsn, String provisioningMethod,
             boolean wakeWordAgentEnabled, CompanionAppInformation companionAppInfo,
-            CompanionServiceInformation companionServiceInfo) {
+            CompanionServiceInformation companionServiceInfo,
+            boolean autoLoginEnabled, String autoLoginUsername, String autoLoginPassword) {
+    	
         this(productId, dsn, provisioningMethod, wakeWordAgentEnabled, companionAppInfo,
-                companionServiceInfo, DEFAULT_HOST);
+                companionServiceInfo, DEFAULT_HOST, autoLoginEnabled, autoLoginUsername, autoLoginPassword);
     }
 
     /**
@@ -170,6 +193,27 @@ public class DeviceConfig {
      */
     public String getDsn() {
         return dsn;
+    }
+    
+    /**
+     * @return autoLoginEnabled.
+     */
+    public boolean isAutoLoginEnabled() {
+    	return autoLoginEnabled;
+    }
+    
+    /**
+     * @return autoLoginUsername.
+     */
+    public String getAutoLoginUsername() {
+    	return autoLoginUsername;
+    }
+    
+    /**
+     * @return autoLoginPassword.
+     */
+    public String getAutoLoginPassword() {
+    	return autoLoginPassword;
     }
 
     /**
@@ -234,7 +278,10 @@ public class DeviceConfig {
                         .add(DSN, dsn)
                         .add(PROVISIONING_METHOD, provisioningMethod.toString())
                         .add(WAKE_WORD_AGENT_ENABLED, wakeWordAgentEnabled)
-                        .add(AVS_HOST, avsHost.toString());
+                        .add(AVS_HOST, avsHost.toString())
+                		.add(AUTO_LOGIN_ENABLED, autoLoginEnabled)
+                		.add(AUTO_LOGIN_USERNAME, autoLoginUsername)
+                		.add(AUTO_LOGIN_PASSWORD, autoLoginPassword);
 
         if (companionAppInfo != null) {
             builder.add(COMPANION_APP, companionAppInfo.toJson());

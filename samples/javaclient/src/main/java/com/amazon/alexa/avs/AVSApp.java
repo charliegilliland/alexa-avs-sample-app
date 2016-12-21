@@ -380,25 +380,32 @@ public class AVSApp extends JFrame implements ExpectSpeechListener, RecordingRMS
         String title = "Login to Register/Authenticate your Device";
         String regUrl =
                 deviceConfig.getCompanionServiceInfo().getServiceUrl() + "/provision/" + regCode;
-        int selected =
-                showYesNoDialog(
-                        "Please register your device by visiting the following URL in "
-                                + "a web browser and follow the instructions:\n"
-                                + regUrl
-                                + "\n\n Would you like to open the URL automatically in your default browser?",
-                        title);
-        if (selected == JOptionPane.YES_OPTION) {
-            try {
-                Desktop.getDesktop().browse(new URI(regUrl));
-            } catch (Exception e) {
-                // Ignore and proceed
+        
+        if (deviceConfig.isAutoLoginEnabled()) {
+        	AutoLogin autoLogin = new AutoLogin(deviceConfig);
+        	autoLogin.login(regUrl);
+        } else {
+        	int selected =
+                    showYesNoDialog(
+                            "Please register your device by visiting the following URL in "
+                                    + "a web browser and follow the instructions:\n"
+                                    + regUrl
+                                    + "\n\n Would you like to open the URL automatically in your default browser?",
+                            title);
+            if (selected == JOptionPane.YES_OPTION) {
+                try {
+                    Desktop.getDesktop().browse(new URI(regUrl));
+                } catch (Exception e) {
+                    // Ignore and proceed
+                }
+                title = "Click OK after Registering/Authenticating Device";
+                showDialog(
+                        "If a browser window did not open, please copy and paste the below URL into a "
+                                + "web browser, and follow the instructions:\n" + regUrl
+                                + "\n\n Click the OK button when finished.", title);
             }
-            title = "Click OK after Registering/Authenticating Device";
-            showDialog(
-                    "If a browser window did not open, please copy and paste the below URL into a "
-                            + "web browser, and follow the instructions:\n" + regUrl
-                            + "\n\n Click the OK button when finished.", title);
         }
+        
     }
 
     @Override
