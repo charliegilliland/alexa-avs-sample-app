@@ -7,6 +7,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
+import java.util.logging.*;
+
 /**
  * Automatically authenticate with Amazon
  */
@@ -28,6 +30,10 @@ public class AutoLogin {
 	 * @param url
 	 */
 	public void login(String url) {
+		
+		Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF); 
+	    Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
+		
 		WebDriver driver = new HtmlUnitDriver();
 		driver.get(url);
 
