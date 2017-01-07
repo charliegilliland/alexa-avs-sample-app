@@ -3,6 +3,9 @@
     "dsn":"${DeviceSerialNumber}",
     "provisioningMethod":"companionService",
     "wakeWordAgentEnabled":${Wake_Word_Detection_Enabled},
+    "autoLoginEnabled":${Auto_Login_Enabled},
+    "autoLoginUsername":"${Auto_Login_Username}",
+    "autoLoginPassword":"${Auto_Login_Password}",
     "companionApp":{
         "localPort":8443,
         "sslKeyStore":"${Java_Client_Loc}/certs/server/jetty.pkcs12",

@@ -359,6 +359,35 @@ if [ "$USER_RESPONSE" = "$NO_ANSWER" ]; then
   Wake_Word_Detection_Enabled="false"
 fi
 
+Auto_Login_Enabled="true"
+# Check if user wants to enable Auto Login
+clear
+echo "=== Enabling Auto Login ===="
+echo ""
+echo ""
+echo "Do you want to enable Auto Login?"
+echo ""
+echo ""
+echo "======================================================="
+echo ""
+echo ""
+parse_user_input 1 1 1
+USER_RESPONSE=$?
+if [ "$USER_RESPONSE" = "$NO_ANSWER" ]; then
+Auto_Login_Enabled="false"
+fi
+
+if [ "$USER_RESPONSE" = "$YES_ANSWER" ]; then
+#read username & password
+echo "Enter your Amazon email used to set up your developer account."
+read -p "Email: " Auto_Login_Username
+echo
+
+echo "Enter your Amazon password here (doesn't echo) or enter it manually in /samples/javaclient/config.json after the install finishes."
+read -p "Password: " -s Auto_Login_Password
+echo
+fi
+
 # Preconfigured variables
 OS=rpi
 User=$(id -un)
