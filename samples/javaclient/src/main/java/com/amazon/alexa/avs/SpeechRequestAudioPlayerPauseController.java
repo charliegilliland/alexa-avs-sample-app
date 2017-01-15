@@ -14,6 +14,9 @@ package com.amazon.alexa.avs;
 
 import com.amazon.alexa.avs.AVSAudioPlayer.AlexaSpeechListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
@@ -23,12 +26,14 @@ import java.util.concurrent.CountDownLatch;
  */
 public class SpeechRequestAudioPlayerPauseController
         implements AlexaSpeechListener, ExpectSpeechListener {
+    private static final Logger log =
+            LoggerFactory.getLogger(SpeechRequestAudioPlayerPauseController.class);
     private final AVSAudioPlayer audioPlayer;
     private Optional<CountDownLatch> outstandingDirectiveCount = Optional.empty();
     private Optional<Thread> resumeAudioThread = Optional.empty();
     private Optional<CountDownLatch> alexaSpeaking = Optional.empty();
     private Optional<CountDownLatch> alexaListening = Optional.empty();
-    boolean speechRequestRunning = false;
+    private volatile boolean speechRequestRunning = false;
 
     public SpeechRequestAudioPlayerPauseController(AVSAudioPlayer audioPlayer) {
         this.audioPlayer = audioPlayer;
@@ -39,6 +44,7 @@ public class SpeechRequestAudioPlayerPauseController
      * Called when the starting a speech request to alexa voice service
      */
     public void startSpeechRequest() {
+        log.debug("Speech request started");
         alexaListening = Optional.of(new CountDownLatch(1));
         audioPlayer.interruptAllAlexaOutput();
         resumeAudioThread.ifPresent(t -> t.interrupt());
@@ -49,6 +55,7 @@ public class SpeechRequestAudioPlayerPauseController
      * Called when finished Listening
      */
     public void finishedListening() {
+        log.debug("Finished listening to user speech");
         alexaListening.ifPresent(c -> c.countDown());
         if (!speechRequestRunning) {
             audioPlayer.resumeAllAlexaOutput();
@@ -59,16 +66,19 @@ public class SpeechRequestAudioPlayerPauseController
      * Called each time a directive is dispatched
      */
     public void dispatchDirective() {
+        log.debug("Dispatching directive");
         outstandingDirectiveCount.ifPresent(c -> c.countDown());
     }
 
     @Override
     public void onAlexaSpeechStarted() {
+        log.debug("Alexa speech started");
         alexaSpeaking = Optional.of(new CountDownLatch(1));
     }
 
     @Override
     public void onAlexaSpeechFinished() {
+        log.debug("Alexa speech finished");
         alexaSpeaking.ifPresent(c -> c.countDown());
         if (!speechRequestRunning) {
             audioPlayer.resumeAllAlexaOutput();
@@ -88,6 +98,7 @@ public class SpeechRequestAudioPlayerPauseController
      *            just finished
      */
     public void speechRequestProcessingFinished(int directiveCount) {
+        log.debug("Finished processing speech request");
         resumeAudioThread.ifPresent(t -> t.interrupt());
         outstandingDirectiveCount = Optional.of(new CountDownLatch(directiveCount));
         resumeAudioThread = Optional.of(new Thread() {
@@ -96,6 +107,7 @@ public class SpeechRequestAudioPlayerPauseController
 
             @Override
             public void run() {
+                log.debug("Started resume audio thread");
                 outstandingDirectiveCount.ifPresent(c -> awaitOnLatch(c));
                 if (alexaListening.isPresent() || alexaSpeaking.isPresent()) {
                     alexaSpeaking.ifPresent(c -> awaitOnLatch(c));
@@ -103,6 +115,7 @@ public class SpeechRequestAudioPlayerPauseController
                 }
                 if (!isInterrupted) {
                     speechRequestRunning = false;
+                    log.debug("Resuming all Alexa output");
                     audioPlayer.resumeAllAlexaOutput();
                 }
 

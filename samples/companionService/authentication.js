@@ -23,7 +23,7 @@ var lwaProdAuthUrl = oAuthServer + '?client_id=' + config.clientId + '&response_
 
 /**
  * Create an error object to return to the user.
- * 
+ *
  * @param name The name of the error.
  * @param msg The message associated with the error.
  * @param status The HTTP status code for the error.
@@ -39,7 +39,7 @@ function error(name, msg, status) {
 
 /**
  * Create an object of relevant LWA HTTP request information.
- * 
+ *
  * @param urlPath The LWA host.
  * @returns LWA HTTP request information.
  */
@@ -58,7 +58,7 @@ function getLwaPostOptions(urlPath) {
 
 /**
  * Redirect the user to the LWA page to authenticate.
- * 
+ *
  * @param deviceInfo Device information including productId and dsn.
  * @param regCode The regCode passed in from the user.
  * @param res The HTTP response object.
@@ -82,7 +82,7 @@ function redirectToDeviceAuthenticate(deviceInfo, regCode, res) {
 
 /**
  * Determine if the user provided productId and dsn match the known map.
- * 
+ *
  * @param productId The productId.
  * @param dsn The dsn.
  * @returns {Boolean}
@@ -101,22 +101,22 @@ function isValidDevice(productId, dsn) {
 
 /**
  * Generate a registration code for a device, and map it to the device.
- * 
+ *
  * The registration code is used by the user as a key to know what device to associate tokens with.
- * 
+ *
  * @param productId The productId.
  * @param dsn The dsn.
  * @param callback The callback(err, json) to return data to the user.
  */
 auth.getRegCode = function(productId, dsn, callback) {
     var missingProperties = [];
-	if (!productId) {
-		missingProperties.push("productId");
-	}
+    if (!productId) {
+        missingProperties.push("productId");
+    }
 
-	if (!dsn) {
-		missingProperties.push("dsn");
-	}
+    if (!dsn) {
+        missingProperties.push("dsn");
+    }
 
     if (missingProperties.length > 0) {
         callback(error("MissingParams", "The following parameters were missing or empty strings: " + missingProperties.join(", "), 400));
@@ -139,8 +139,8 @@ auth.getRegCode = function(productId, dsn, callback) {
             sessionIds.push(sessionId);
             regCodeToSessionId[regCode] = sessionId;
             sessionIdToDeviceInfo[sessionId] = {
-            	productId: productId,
-            	dsn: dsn,
+                productId: productId,
+                dsn: dsn,
             };
 
             reply = {
@@ -155,17 +155,17 @@ auth.getRegCode = function(productId, dsn, callback) {
 
 /**
  * Get an accessToken associated with the sessionId.
- * 
+ *
  * Makes a request to LWA to get accessToken given the stored refreshToken.
- * 
+ *
  * @param sessionId The sessionId for this device.
  * @param callback The callback(err, json) to return data to the user.
  */
 auth.getAccessToken = function(sessionId, callback) {
     var missingProperties = [];
-	if (!sessionId) {
-		missingProperties.push("sessionId");
-	}
+    if (!sessionId) {
+        missingProperties.push("sessionId");
+    }
 
     if (missingProperties.length > 0) {
         callback(error("MissingParams", "The following parameters were missing or empty strings: " + missingProperties.join(", "), 400));
@@ -178,7 +178,7 @@ auth.getAccessToken = function(sessionId, callback) {
     }
 
     if (!(sessionId in sessionIdToRefreshToken)) {
-        callback(error('InvalidSessionId', 'The provided sessionId is not ready to use.', 401));
+        callback(error('InvalidSessionId', "No refresh tokens cached for session id: " + sessionId, 401));
         return;
     }
 
@@ -186,9 +186,9 @@ auth.getAccessToken = function(sessionId, callback) {
 
     var options = getLwaPostOptions('/auth/o2/token');
     var reqGrant = 'grant_type=refresh_token' +
-    	'&refresh_token=' + refreshToken +
-    	'&client_id=' + config.clientId +
-    	'&client_secret=' + config.clientSecret;
+        '&refresh_token=' + refreshToken +
+        '&client_id=' + config.clientId +
+        '&client_secret=' + config.clientSecret;
 
     var req = https.request(options, function (res) {
         var resultBuffer = null;
@@ -199,7 +199,7 @@ auth.getAccessToken = function(sessionId, callback) {
 
                 // Craft the response to the device
                 var reply = {
-                	access_token: result.access_token,
+                    access_token: result.access_token,
                     expires_in: result.expires_in
                 };
                 callback(null, reply);
@@ -231,7 +231,7 @@ auth.getAccessToken = function(sessionId, callback) {
 
 /**
  * Redirects the user to the LWA login page to enter their username and password.
- * 
+ *
  * @param regCode The registration code that was presented to the user and maps their request to the device that generated the registration code.
  * @param res The HTTP response object.
  * @param callback The callback(err, json) to return data to the user.
@@ -249,20 +249,20 @@ auth.register = function (regCode, res, callback) {
 
 /**
  * Performs the initial request for refreshToken after the user has logged in and redirected to /authresponse.
- * 
+ *
  * @param authCode The authorization code that was included in the redirect from LWA.
  * @param stateCode The state code that we use to map a redirect from LWA back to device information.
  * @param callback The callback(err, json) to return data to the user.
  */
 auth.authresponse = function (authCode, stateCode, callback) {
     var missingProperties = [];
-	if (!authCode) {
-		missingProperties.push("code");
-	}
+    if (!authCode) {
+        missingProperties.push("code");
+    }
 
-	if (!stateCode) {
-		missingProperties.push("state");
-	}
+    if (!stateCode) {
+        missingProperties.push("state");
+    }
 
     if (missingProperties.length > 0) {
         callback(error("MissingParams", "The following parameters were missing or empty strings: " + missingProperties.join(", "), 400));
@@ -279,7 +279,7 @@ auth.authresponse = function (authCode, stateCode, callback) {
 
     var options = getLwaPostOptions('/auth/o2/token');
     var reqGrant = 'grant_type=authorization_code' +
-    	'&code=' + authCode +
+        '&code=' + authCode +
         '&redirect_uri=' + config.redirectUrl +
         '&client_id=' + config.clientId +
         '&client_secret=' + config.clientSecret;
@@ -290,7 +290,7 @@ auth.authresponse = function (authCode, stateCode, callback) {
         res.on('end', function () {
             if (res.statusCode === 200 && resultBuffer !== null) {
                 var result = JSON.parse(resultBuffer);
-                
+
                 sessionIdToRefreshToken[sessionId] = result.refresh_token;
                 callback(null, "device tokens ready");
             } else {

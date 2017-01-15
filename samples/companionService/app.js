@@ -11,6 +11,7 @@ app.use(bodyParser.json());
  */
 app.get('/provision/regCode', function (req, res) {
     if (!req.client.authorized) {
+        console.error("User is not authorized to access this URL. Make sure the client certificate is set up properly");
         res.status(401);
         res.send({ error: "Unauthorized", message: "You are not authorized to access this URL. Make sure your client certificate is set up properly." });
         return;
@@ -18,9 +19,11 @@ app.get('/provision/regCode', function (req, res) {
 
     auth.getRegCode(req.query.productId, req.query.dsn, function (err, reply) {
         if (err) {
+            console.error("Error retrieving registration code: " + err.name + ", " + err.message);
             res.status(err.status);
             res.send({ error: err.name, message: err.message });
         } else {
+            console.log("Successfully retrieved registration code for " + req.query.productId + " / " + req.query.dsn);
             res.send(reply);
         }
     });
@@ -31,6 +34,7 @@ app.get('/provision/regCode', function (req, res) {
  */
 app.get('/provision/accessToken', function (req, res) {
     if (!req.client.authorized) {
+        console.error("User is not authorized to access this URL. Make sure the client certificate is set up properly");
         res.status(401);
         res.send({ error: "Unauthorized", message: "You are not authorized to access this URL. Make sure your client certificate is set up properly." });
         return;
@@ -38,9 +42,11 @@ app.get('/provision/accessToken', function (req, res) {
 
     auth.getAccessToken(req.query.sessionId, function (err, reply) {
         if (err) {
+            console.error("Error retrieving access token: " + err.name + ", " + err.message);
             res.status(err.status);
             res.send({ error: err.name, message: err.message });
         } else {
+            console.log("Successfully retrieved access token for session id: " + req.query.sessionId);
             res.send(reply);
         }
     });
@@ -74,9 +80,15 @@ app.get('/authresponse', function (req, res) {
 
 // standard error handling functions.
 app.use(function (req, res, next) {
-    var err = new Error('Not Found: ' + req.url);
-    err.status = 404;
-    next(err);
+    // Suppress /favicon.ico errors
+    var favicon = "favicon.ico";
+    if (req.url.slice(-favicon.length) != favicon) {
+        var err = new Error('Not Found: ' + req.url);
+        err.status = 404;
+        next(err);
+    } else {
+        next();
+    }
 });
 
 app.use(function (err, req, res, next) {

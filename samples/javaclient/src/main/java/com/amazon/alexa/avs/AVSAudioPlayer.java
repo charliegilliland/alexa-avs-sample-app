@@ -442,6 +442,7 @@ public class AVSAudioPlayer {
      * Interrupt all audio - Alarms, speech, and media
      */
     public void interruptAllAlexaOutput() {
+        log.debug("Interrupting all Alexa output");
         if (isSpeaking()) {
             // Then we are interrupting some speech
             interruptCurrentlyPlaying();
@@ -469,6 +470,7 @@ public class AVSAudioPlayer {
 
         synchronized (audioPlayer.getMediaPlayer()) {
             if (!playQueue.isEmpty() && isPlaying() && audioPlayer.getMediaPlayer().isPlaying()) {
+                log.debug("AudioPlayer content interrupted");
                 audioPlayer.getMediaPlayer().pause();
             }
         }
@@ -479,6 +481,7 @@ public class AVSAudioPlayer {
      * resuming speech is not necessary
      */
     public void resumeAllAlexaOutput() {
+        log.debug("Resuming all Alexa output");
         if (speakQueue.isEmpty() && !resumeAlerts()) {
             resumeContent();
         }
@@ -504,6 +507,7 @@ public class AVSAudioPlayer {
                     && !audioPlayer.getMediaPlayer().isPlaying()) {
                 // Pause toggles the pause state of the media player, if it was previously paused it
                 // will be resumed.
+                log.debug("AudioPlayer content resumed");
                 audioPlayer.getMediaPlayer().pause();
             }
         }
@@ -653,14 +657,13 @@ public class AVSAudioPlayer {
         controller
                 .sendRequest(RequestFactory.createSpeechSynthesizerSpeechStartedEvent(latestToken));
 
-        interruptAlertsAndContent();
-
         Thread thread = new Thread() {
             @Override
             public void run() {
                 synchronized (playLock) {
                     try {
                         InputStream inpStream = speak.getAudio();
+                        interruptAlertsAndContent();
                         play(inpStream);
                         while (inpStream.available() > 0) {
                             playLock.wait(TIMEOUT_IN_MS);

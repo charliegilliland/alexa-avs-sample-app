@@ -47,7 +47,8 @@ public class AuthSetup implements AccessTokenListener {
      *            Information about this device.
      * @param regCodeDisplayHandler
      */
-    public AuthSetup(final DeviceConfig deviceConfig, final RegCodeDisplayHandler regCodeDisplayHandler) {
+    public AuthSetup(final DeviceConfig deviceConfig,
+            final RegCodeDisplayHandler regCodeDisplayHandler) {
         this.deviceConfig = deviceConfig;
         this.regCodeDisplayHandler = regCodeDisplayHandler;
     }
@@ -93,6 +94,10 @@ public class AuthSetup implements AccessTokenListener {
                     try {
                         authManager.startRemoteProvisioning();
                     } catch (Exception e) {
+                        if (e.getMessage().startsWith("InvalidSessionId")) {
+                            log.error(
+                                    "Could not authenticate. Did you sign into Amazon before clicking ok?");
+                        }
                         log.error("Failed to start companion service client", e);
                     }
                 }
@@ -103,6 +108,8 @@ public class AuthSetup implements AccessTokenListener {
 
     @Override
     public void onAccessTokenReceived(String accessToken) {
-        accessTokenListeners.stream().forEach(listener -> listener.onAccessTokenReceived(accessToken));
+        accessTokenListeners
+                .stream()
+                .forEach(listener -> listener.onAccessTokenReceived(accessToken));
     }
 }

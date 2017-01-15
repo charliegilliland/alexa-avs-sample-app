@@ -4,3 +4,4 @@
 03/22/2016 - Updated the reference client to use the new v20160207 APIs over HTTP2. Adds support for timers, alarms, button events, and control via the companion app.
 09/29/2016 - Added Wake Word detection for raspberry pi platform. Added support for cloud endpointing via the new NEAR_FIELD audio profile and StopCapture directive.
 12/06/2016 - Sample app is now officially certified for music. Added GPIO wake word trigger. Bug fixes around AudioPlayer, wake word agent, and down channel.
+01/13/2017 - Bug fixes, updated sound files, and more logging.

@@ -12,6 +12,9 @@
  */
 package com.amazon.alexa.avs;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -24,6 +27,7 @@ import java.nio.ByteOrder;
  * a large buffer to avoid dropping audio bytes while waiting for a connection to AVS
  */
 public class AudioStateOutputStream extends PipedOutputStream {
+    private static final Logger log = LoggerFactory.getLogger(AudioStateOutputStream.class);
     private RecordingStateListener stateListener;
     private RecordingRMSListener rmsListener;
 
@@ -40,6 +44,12 @@ public class AudioStateOutputStream extends PipedOutputStream {
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
         super.write(b, off, len);
+        try {
+            super.flush();
+        } catch (IOException e) {
+            log.error("Failed to flush AudioStateOutputStream", e);
+            throw e;
+        }
         calculateDB(b, len);
     }
 

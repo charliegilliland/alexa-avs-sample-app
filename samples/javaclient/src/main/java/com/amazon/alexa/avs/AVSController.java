@@ -12,27 +12,6 @@
  */
 package com.amazon.alexa.avs;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-
-import javax.sound.sampled.LineUnavailableException;
-
-import org.apache.commons.fileupload.MultipartStream;
-import org.eclipse.jetty.client.api.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.amazon.alexa.avs.AVSAudioPlayer.AlexaSpeechListener;
 import com.amazon.alexa.avs.AlertManager.ResultListener;
 import com.amazon.alexa.avs.auth.AccessTokenListener;
@@ -57,6 +36,25 @@ import com.amazon.alexa.avs.wakeword.WakeWordDetectedHandler;
 import com.amazon.alexa.avs.wakeword.WakeWordIPC;
 import com.amazon.alexa.avs.wakeword.WakeWordIPC.IPCCommand;
 import com.amazon.alexa.avs.wakeword.WakeWordIPCFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
+import javax.sound.sampled.LineUnavailableException;
 
 public class AVSController implements RecordingStateListener, AlertHandler, AlertEventListener,
         AccessTokenListener, DirectiveDispatcher, AlexaSpeechListener, ParsingFailedHandler,
@@ -106,7 +104,7 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
             AlertManagerFactory alarmFactory, AVSClientFactory avsClientFactory,
             DialogRequestIdAuthority dialogRequestIdAuthority, boolean wakeWordAgentEnabled,
             WakeWordIPCFactory wakewordIPCFactory, WakeWordDetectedHandler wakeWakeDetectedHandler)
-            throws Exception {
+                    throws Exception {
 
         this.wakeWordAgentEnabled = wakeWordAgentEnabled;
         this.wakeWordDetectedHandler = wakeWakeDetectedHandler;
@@ -132,9 +130,8 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
         speechRequestAudioPlayerPauseController =
                 new SpeechRequestAudioPlayerPauseController(player);
 
-        expectSpeechListeners =
-                new HashSet<ExpectSpeechListener>(Arrays.asList(listenHandler,
-                        speechRequestAudioPlayerPauseController));
+        expectSpeechListeners = new HashSet<ExpectSpeechListener>(
+                Arrays.asList(listenHandler, speechRequestAudioPlayerPauseController));
         dependentQueue = new LinkedBlockingDeque<>();
 
         independentQueue = new LinkedBlockingDeque<>();
@@ -182,11 +179,10 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
     }
 
     private void getMicrophone(AVSController controller) throws LineUnavailableException {
-        controller.microphone =
-                AudioCapture.getAudioHardware(AUDIO_TYPE.getAudioFormat(),
-                        new MicrophoneLineFactory());
+        controller.microphone = AudioCapture.getAudioHardware(AUDIO_TYPE.getAudioFormat(),
+                new MicrophoneLineFactory());
     }
-    
+
     private void initializeMicrophone() {
 
         if (this.wakeWordAgentEnabled) {
@@ -206,9 +202,8 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
             };
 
             try {
-                LinearRetryPolicy retryPolicy =
-                        new LinearRetryPolicy(WAKE_WORD_RELEASE_RETRY_DELAY_MS,
-                                WAKE_WORD_RELEASE_TRIES);
+                LinearRetryPolicy retryPolicy = new LinearRetryPolicy(
+                        WAKE_WORD_RELEASE_RETRY_DELAY_MS, WAKE_WORD_RELEASE_TRIES);
                 retryPolicy.tryCall(task, Exception.class);
             } catch (Exception e) {
                 log.error("There was a problem connecting to the wake word engine.", e);
@@ -263,10 +258,9 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
         try {
             String dialogRequestId = dialogRequestIdAuthority.createNewDialogRequestId();
 
-            RequestBody body =
-                    RequestFactory.createSpeechRecognizerRecognizeRequest(dialogRequestId, PROFILE,
-                            FORMAT, player.getPlaybackState(), player.getSpeechState(),
-                            alertManager.getState(), player.getVolumeState());
+            RequestBody body = RequestFactory.createSpeechRecognizerRecognizeRequest(
+                    dialogRequestId, PROFILE, FORMAT, player.getPlaybackState(),
+                    player.getSpeechState(), alertManager.getState(), player.getVolumeState());
 
             dependentQueue.clear();
 
@@ -290,7 +284,7 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
             numberRetries = WAKE_WORD_RELEASE_TRIES;
         }
 
-        for(; numberRetries > 0; numberRetries--) {
+        for (; numberRetries > 0; numberRetries--) {
             try {
                 return microphone.getAudioInputStream(controller, rmsListener);
             } catch (LineUnavailableException | IOException e) {
@@ -331,13 +325,13 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
                 break;
             case PREVIOUS:
                 sendRequest(RequestFactory.createPlaybackControllerPreviousEvent(
-                        player.getPlaybackState(), player.getSpeechState(),
-                        alertManager.getState(), player.getVolumeState()));
+                        player.getPlaybackState(), player.getSpeechState(), alertManager.getState(),
+                        player.getVolumeState()));
                 break;
             case NEXT:
                 sendRequest(RequestFactory.createPlaybackControllerNextEvent(
-                        player.getPlaybackState(), player.getSpeechState(),
-                        alertManager.getState(), player.getVolumeState()));
+                        player.getPlaybackState(), player.getSpeechState(), alertManager.getState(),
+                        player.getVolumeState()));
                 break;
             default:
                 log.error("Failed to handle playback action");
@@ -391,10 +385,10 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
                     e);
             throw e;
         }
-
     }
 
-    private void sendExceptionEncounteredEvent(String directiveJson, ExceptionType type, Exception e) {
+    private void sendExceptionEncounteredEvent(String directiveJson, ExceptionType type,
+            Exception e) {
         sendRequest(RequestFactory.createSystemExceptionEncounteredEvent(directiveJson, type,
                 e.getMessage(), player.getPlaybackState(), player.getSpeechState(),
                 alertManager.getState(), player.getVolumeState()));
@@ -409,32 +403,50 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
             player.handleStop();
         } else if (directiveName.equals(AVSAPIConstants.AudioPlayer.Directives.ClearQueue.NAME)) {
             player.handleClearQueue((ClearQueue) directive.getPayload());
+        } else {
+            throw new DirectiveHandlingException(ExceptionType.UNSUPPORTED_OPERATION,
+                    "The device's audio player component cannot handle this directive.");
         }
+    }
 
+    private void handleSystemDirective(Directive directive) throws DirectiveHandlingException {
+        String directiveName = directive.getName();
+        if (AVSAPIConstants.System.Directives.ResetUserInactivity.NAME.equals(directiveName)) {
+            onUserActivity();
+        } else {
+            throw new DirectiveHandlingException(ExceptionType.UNSUPPORTED_OPERATION,
+                    "The device's system component cannot handle this directive.");
+        }
     }
 
     private void handleSpeechSynthesizerDirective(Directive directive)
             throws DirectiveHandlingException {
         if (directive.getName().equals(AVSAPIConstants.SpeechSynthesizer.Directives.Speak.NAME)) {
             player.handleSpeak((Speak) directive.getPayload());
+        } else {
+            throw new DirectiveHandlingException(ExceptionType.UNSUPPORTED_OPERATION,
+                    "The device's speech synthesizer component cannot handle this directive.");
         }
     }
 
-    private void handleSpeechRecognizerDirective(Directive directive) {
-        if (directive.getName().equals(
-                AVSAPIConstants.SpeechRecognizer.Directives.ExpectSpeech.NAME)) {
-
+    private void handleSpeechRecognizerDirective(Directive directive)
+            throws DirectiveHandlingException {
+        String directiveName = directive.getName();
+        if (AVSAPIConstants.SpeechRecognizer.Directives.ExpectSpeech.NAME.equals(directiveName)) {
             // If your device cannot handle automatically starting to listen, you must
             // implement a listen timeout event, as described here:
             // https://developer.amazon.com/public/solutions/alexa/alexa-voice-service/rest/speechrecognizer-listentimeout-request
             notifyExpectSpeechDirective();
-        } else if (directive.getName().equals(
-                AVSAPIConstants.SpeechRecognizer.Directives.StopCapture.NAME)) {
+        } else if (directiveName
+                .equals(AVSAPIConstants.SpeechRecognizer.Directives.StopCapture.NAME)) {
             stopCaptureHandler.onStopCaptureDirective();
+        } else {
+            throw new DirectiveHandlingException(ExceptionType.UNSUPPORTED_OPERATION,
+                    "The device's speech recognizer component cannot handle this directive.");
         }
     }
 
-    private void handleAlertsDirective(Directive directive) {
+    private void handleAlertsDirective(Directive directive) throws DirectiveHandlingException {
         String directiveName = directive.getName();
         if (directiveName.equals(AVSAPIConstants.Alerts.Directives.SetAlert.NAME)) {
             SetAlert payload = (SetAlert) directive.getPayload();
@@ -456,10 +468,13 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
         } else if (directiveName.equals(AVSAPIConstants.Alerts.Directives.DeleteAlert.NAME)) {
             DeleteAlert payload = (DeleteAlert) directive.getPayload();
             alertManager.delete(payload.getToken());
+        } else {
+            throw new DirectiveHandlingException(ExceptionType.UNSUPPORTED_OPERATION,
+                    "The device's alert component cannot handle this directive.");
         }
     }
 
-    private void handleSpeakerDirective(Directive directive) {
+    private void handleSpeakerDirective(Directive directive) throws DirectiveHandlingException {
         String directiveName = directive.getName();
         if (directiveName.equals(AVSAPIConstants.Speaker.Directives.SetVolume.NAME)) {
             player.handleSetVolume((VolumePayload) directive.getPayload());
@@ -467,12 +482,9 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
             player.handleAdjustVolume((VolumePayload) directive.getPayload());
         } else if (directiveName.equals(AVSAPIConstants.Speaker.Directives.SetMute.NAME)) {
             player.handleSetMute((SetMute) directive.getPayload());
-        }
-    }
-
-    private void handleSystemDirective(Directive directive) {
-        if (directive.getName().equals(AVSAPIConstants.System.Directives.ResetUserInactivity.NAME)) {
-            onUserActivity();
+        } else {
+            throw new DirectiveHandlingException(ExceptionType.UNSUPPORTED_OPERATION,
+                    "The device's speaker component cannot handle this directive.");
         }
     }
 
@@ -555,8 +567,9 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
     }
 
     public void processingFinished() {
-        speechRequestAudioPlayerPauseController.speechRequestProcessingFinished(dependentQueue
-                .size());
+        log.debug("Speech processing finished. Dependent queue size: {}", dependentQueue.size());
+        speechRequestAudioPlayerPauseController
+                .speechRequestProcessingFinished(dependentQueue.size());
     }
 
     @Override
@@ -591,17 +604,17 @@ public class AVSController implements RecordingStateListener, AlertHandler, Aler
 
     @Override
     public void onUserActivity() {
-        lastUserInteractionTimestampSeconds.set(System.currentTimeMillis()
-                / MILLISECONDS_PER_SECOND);
+        lastUserInteractionTimestampSeconds
+                .set(System.currentTimeMillis() / MILLISECONDS_PER_SECOND);
     }
 
     private class UserInactivityReport implements Runnable {
 
         @Override
         public void run() {
-            sendRequest(RequestFactory.createSystemUserInactivityReportEvent((System
-                    .currentTimeMillis() / MILLISECONDS_PER_SECOND)
-                    - lastUserInteractionTimestampSeconds.get()));
+            sendRequest(RequestFactory.createSystemUserInactivityReportEvent(
+                    (System.currentTimeMillis() / MILLISECONDS_PER_SECOND)
+                            - lastUserInteractionTimestampSeconds.get()));
         }
     }
 
