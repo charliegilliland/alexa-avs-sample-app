@@ -10,10 +10,8 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.JavascriptExecutor;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 
-import java.sql.Driver;
 import java.util.logging.*;
 
 
