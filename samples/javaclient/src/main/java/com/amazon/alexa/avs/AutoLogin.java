@@ -48,7 +48,6 @@ public class AutoLogin {
 		driver.get(url);
 		
 		WebElement emailBox = driver.findElement(By.id("ap_email"));	
-		//emailBox.click();
 		emailBox.sendKeys(autoLoginUsername);
 		
 		WebElement passwordBox = driver.findElement(By.id("ap_password"));
@@ -64,15 +63,19 @@ public class AutoLogin {
 			e.printStackTrace();
 		}
 		
-		try {
-			WebElement okayButton = driver.findElement(By.name("consentApproved"));
-			okayButton.click();
-			
-			(new WebDriverWait(driver, TIMEOUT)).until(stalenessOf(okayButton));
-		} catch (Exception e) {
-			//e.printStackTrace();
+		// check if we have to approve the device
+		WebElement bodyElement = driver.findElement(By.tagName("body"));
+		if (!bodyElement.getAttribute("textContent").equals("device tokens ready")) {
+			try {
+				WebElement okayButton = driver.findElement(By.name("consentApproved"));
+				okayButton.click();
+								
+				(new WebDriverWait(driver, TIMEOUT)).until(stalenessOf(okayButton));
+			} catch (Exception e) {
+				//e.printStackTrace();
+			}
 		}
-		
+
 		driver.close();
 	}
 	
